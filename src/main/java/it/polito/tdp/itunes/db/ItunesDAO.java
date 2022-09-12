@@ -36,6 +36,31 @@ public class ItunesDAO {
 		return result;
 	}
 	
+	public List<Album> getAllAlbumsWithPrice(int prezzo){
+		final String sql = "SELECT a.* "
+				+ "FROM track t, album a "
+				+ "WHERE t.AlbumId = a.AlbumId "
+				+ "GROUP BY t.AlbumId "
+				+ "HAVING SUM(UnitPrice) > ?";
+		List<Album> result = new LinkedList<>();
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, prezzo);
+			ResultSet res = st.executeQuery();
+
+			while (res.next()) {
+				result.add(new Album(res.getInt("AlbumId"), res.getString("Title")));
+			}
+			conn.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+		return result;
+	}
+	
 	public List<Artist> getAllArtists(){
 		final String sql = "SELECT * FROM Artist";
 		List<Artist> result = new LinkedList<>();
@@ -139,5 +164,26 @@ public class ItunesDAO {
 		return result;
 	}
 	
+	public int calcolaPrezzoAlbum(Album album){
+		final String sql = "SELECT SUM(UnitPrice) AS prezzo "
+				+ "FROM track "
+				+ "WHERE AlbumId = ?";
+		
+		try {
+			Connection conn = DBConnect.getConnection();
+			PreparedStatement st = conn.prepareStatement(sql);
+			st.setInt(1, album.getAlbumId());
+			ResultSet res = st.executeQuery();
+
+			res.first();
+			int prezzo = res.getInt("prezzo");
+			
+			conn.close();
+			return prezzo;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw new RuntimeException("SQL Error");
+		}
+	}
 	
 }

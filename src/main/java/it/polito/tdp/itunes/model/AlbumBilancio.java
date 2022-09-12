@@ -1,6 +1,7 @@
 package it.polito.tdp.itunes.model;
 
 public class AlbumBilancio implements Comparable<AlbumBilancio>{
+
 	private Album album;
 	private Double bilancio;
 	
